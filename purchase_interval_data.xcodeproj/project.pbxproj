@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		524B47A617919FEC007A5264 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 524B47A517919FEC007A5264 /* main.cpp */; };
+		5229F83E179539CD00C14CB5 /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5229F83C179539CD00C14CB5 /* util.cpp */; };
+		524B47A617919FEC007A5264 /* PurchaseIntervalGenerator_main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 524B47A517919FEC007A5264 /* PurchaseIntervalGenerator_main.cpp */; };
 		524B47A817919FEC007A5264 /* purchase_interval_data.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 524B47A717919FEC007A5264 /* purchase_interval_data.1 */; };
+		524B47B01791A034007A5264 /* PurchaseIntervalGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 524B47AF1791A034007A5264 /* PurchaseIntervalGenerator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,9 +27,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5229F83B179539CD00C14CB5 /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = constants.h; sourceTree = "<group>"; };
+		5229F83C179539CD00C14CB5 /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
+		5229F83D179539CD00C14CB5 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
 		524B47A117919FEC007A5264 /* purchase_interval_data */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = purchase_interval_data; sourceTree = BUILT_PRODUCTS_DIR; };
-		524B47A517919FEC007A5264 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		524B47A517919FEC007A5264 /* PurchaseIntervalGenerator_main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PurchaseIntervalGenerator_main.cpp; sourceTree = "<group>"; };
 		524B47A717919FEC007A5264 /* purchase_interval_data.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = purchase_interval_data.1; sourceTree = "<group>"; };
+		524B47AE1791A00D007A5264 /* PurchaseIntervalGenerator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PurchaseIntervalGenerator.h; sourceTree = "<group>"; };
+		524B47AF1791A034007A5264 /* PurchaseIntervalGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PurchaseIntervalGenerator.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,8 +67,13 @@
 		524B47A417919FEC007A5264 /* purchase_interval_data */ = {
 			isa = PBXGroup;
 			children = (
-				524B47A517919FEC007A5264 /* main.cpp */,
+				5229F83B179539CD00C14CB5 /* constants.h */,
+				5229F83C179539CD00C14CB5 /* util.cpp */,
+				5229F83D179539CD00C14CB5 /* util.h */,
+				524B47A517919FEC007A5264 /* PurchaseIntervalGenerator_main.cpp */,
 				524B47A717919FEC007A5264 /* purchase_interval_data.1 */,
+				524B47AE1791A00D007A5264 /* PurchaseIntervalGenerator.h */,
+				524B47AF1791A034007A5264 /* PurchaseIntervalGenerator.cpp */,
 			);
 			path = purchase_interval_data;
 			sourceTree = "<group>";
@@ -117,7 +129,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				524B47A617919FEC007A5264 /* main.cpp in Sources */,
+				524B47A617919FEC007A5264 /* PurchaseIntervalGenerator_main.cpp in Sources */,
+				524B47B01791A034007A5264 /* PurchaseIntervalGenerator.cpp in Sources */,
+				5229F83E179539CD00C14CB5 /* util.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +224,7 @@
 				524B47AD17919FEC007A5264 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

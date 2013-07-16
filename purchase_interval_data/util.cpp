@@ -39,6 +39,6 @@ string Util::trim(const string& str)
 
 string Util::itos(int i){
     stringstream sstream;
-    sstream < i;
+    sstream << i;
     return sstream.str();
 }

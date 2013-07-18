@@ -23,15 +23,20 @@
 using namespace std;
 
 PurchaseIntervalGenerator::PurchaseIntervalGenerator(string file){
-    productIntervalResult = new multimap<int, map<int, multimap<int, int> > >;//user{sourceproduct{targetproduct,time}}
-    categoryIntervalResult = new multimap<int, map<int, multimap<int, int> > >;
+    productPersonalIntervalResult = new multimap<int, map<int, multimap<int, int> > >;//user{sourceproduct{targetproduct,time}}
+    categoryPersonalIntervalResult = new multimap<int, map<int, multimap<int, int> > >;
+    
+    productIntervalResult = new map<int,multimap<int,string> >;
+    
     productTransResult = new map<int,map<int,int> >;
     categoryTransResult = new map<int,map<int,int> >;
+    
     //definition of files
     inputFileName = file;
-    cout << inputFileName << endl;
+    //cout << inputFileName << endl;
+    productPersonalIntervalResultFileName = inputFileName + "-personal-interval-product";
+    categoryPersonalIntervalResultFileName = inputFileName + "-personal-interval-category";
     productIntervalResultFileName = inputFileName + "-interval-product";
-    categoryIntervalResultFileName = inputFileName + "-interval-category";
     productTransResultFileName = inputFileName + "-trans-product";
     categoryTransResultFileName = inputFileName + "-trans-category";
     userDictFileName = inputFileName + "-interval-ud";
@@ -40,11 +45,14 @@ PurchaseIntervalGenerator::PurchaseIntervalGenerator(string file){
 }
 
 PurchaseIntervalGenerator::~PurchaseIntervalGenerator(){
+    if (productPersonalIntervalResult) {
+        delete productPersonalIntervalResult;
+    }
+    if (categoryPersonalIntervalResult) {
+        delete categoryPersonalIntervalResult;
+    }
     if (productIntervalResult) {
         delete productIntervalResult;
-    }
-    if (categoryIntervalResult) {
-        delete categoryIntervalResult;
     }
     if (productTransResult) {
         delete productTransResult;
@@ -54,8 +62,8 @@ PurchaseIntervalGenerator::~PurchaseIntervalGenerator(){
     }
 }
 
-void PurchaseIntervalGenerator::generateProductInterval(){
-    cout << "generate product-interval..." << endl;
+void PurchaseIntervalGenerator::generatePersonalProductInterval(){
+    cout << "generate personal-product-interval..." << endl;
     int user_index = 1;//current user-index
     int product_index = 1;//current product-index
     map<string,int> userDictMap;//userid-index dictionary in form of map
@@ -124,7 +132,7 @@ void PurchaseIntervalGenerator::generateProductInterval(){
                 productTimeMap.clear();
             }
             if (current_user != "") {
-                productIntervalResult->insert(make_pair(userDictMap[current_user], sProduct));
+                productPersonalIntervalResult->insert(make_pair(userDictMap[current_user], sProduct));
             }
             sProduct.clear();
             userPurchase.clear();
@@ -151,25 +159,17 @@ void PurchaseIntervalGenerator::generateProductInterval(){
     userDictFile.close();
 }
 
-void PurchaseIntervalGenerator::generateCategoryInterval(){
-    
-}
-
-void PurchaseIntervalGenerator::generateInterval(){
-    
-}
-
-void PurchaseIntervalGenerator::outputProductIntervalFile(){
-    cout << "Wtriting the product-interval file..." << endl;
-    ofstream productIntervalResultFile;
-    productIntervalResultFile.open(productIntervalResultFileName.c_str());
+void PurchaseIntervalGenerator::outputPersonalProductIntervalFile(){
+    cout << "Wtriting the personal-product-interval file..." << endl;
+    ofstream productPersonalIntervalResultFile;
+    productPersonalIntervalResultFile.open(productPersonalIntervalResultFileName.c_str());
     int coCount;//the times a pair-product oc-appearance
     double totalDate;//the sum of date of each pair-product
     string times;//times of pair-product(t1,t2,t3...)
     
     multimap<int, map<int, multimap<int, int> > >::iterator user,userEnd;
-    userEnd = productIntervalResult->end();//calculate once
-    for (user=productIntervalResult->begin(); user!=userEnd; user++) {//for each user
+    userEnd = productPersonalIntervalResult->end();//calculate once
+    for (user=productPersonalIntervalResult->begin(); user!=userEnd; user++) {//for each user
         map<int, multimap<int,int> > sProducts = user->second;
         map<int, multimap<int,int> >::iterator sProduct;
         for (sProduct=sProducts.begin(); sProduct!=sProducts.end(); sProduct++) {//for each source-product
@@ -182,34 +182,99 @@ void PurchaseIntervalGenerator::outputProductIntervalFile(){
                 totalDate=0;
                 times="";
                 for (multimap<int, int>::size_type cnt = 0; cnt != entries; ++cnt,++coCount,tProduct++) {
-                    int date;
-                    date = tProduct->second;
-                    totalDate += date;
-                    times += Util::itos(date)+",";
+                    int day;
+                    day = tProduct->second;
+                    totalDate += day;
+                    times += Util::itos(day)+",";
                 }
                 times = times.substr(0,times.length()-1);
-                productIntervalResultFile << user->first << " " << sProduct->first << " " << *key << " " << times << " " << coCount << " " << totalDate/coCount << endl;
+                productPersonalIntervalResultFile << user->first << " " << sProduct->first << " " << *key << " " << times << " " << coCount << " " << totalDate/coCount << endl;
             }
         }
     }
     
-    productIntervalResultFile.close();
-    cout << "Writing the product-interval file ok!" <<endl;
-}
-
-void PurchaseIntervalGenerator::outputCategoryIntervalFile(){
-
+    productPersonalIntervalResultFile.close();
+    cout << "Writing the personal-product-interval file ok!" <<endl;
+    
 }
 
 
-set<int> PurchaseIntervalGenerator::getAllKeys(multimap<int, int> p){
-    multimap<int, int>::iterator tProduct;
-    set<int> keys;
-    for (tProduct = p.begin(); tProduct != p.end(); tProduct++) {
-        keys.insert(tProduct->first);
+void PurchaseIntervalGenerator::outputPersonalCategoryIntervalFile(){
+
+}
+
+void PurchaseIntervalGenerator::generatePersonalCategoryInterval(){
+    
+}
+
+void PurchaseIntervalGenerator::generatePersonalInterval(){
+    
+}
+
+
+void PurchaseIntervalGenerator::generateProductInterval(){
+    cout << "generate product-interval..." << endl;
+    multimap<int,string> temp;
+    
+    //open the files
+    ifstream inputFile;
+    inputFile.open(productPersonalIntervalResultFileName.c_str());
+    //if the personal-product-interval file is not exsit,first generate the personal-product-interval file
+    if (!inputFile) {
+        cout<< "the personal product interval file is not exsit,first generate the file..." << endl;
+        inputFile.close();
+        generatePersonalProductInterval();
+        inputFile.open(productPersonalIntervalResultFileName.c_str());
     }
-    return keys;
+    
+    while (!inputFile.eof()) {
+        string line;
+        getline(inputFile,line);
+        if(line.size() == 0)
+            continue;
+        
+        vector<string> items = Util::split(line, SPACE);
+        int sourceProduct = atoi(items[1].c_str());
+        int targetProduct = atoi(items[2].c_str());
+        string times = items[3];
+        
+        if (productIntervalResult->find(sourceProduct) == productIntervalResult->end()) {
+            temp.insert(make_pair(targetProduct, times));
+            productIntervalResult->insert(make_pair(sourceProduct, temp));
+            temp.clear();
+        }
+        else{
+            (*productIntervalResult)[sourceProduct].insert(make_pair(targetProduct, times));
+        }
+    }
 }
+
+void PurchaseIntervalGenerator::outputProductIntervalFile(){
+    cout << "Wtriting the product-interval file..." << endl;
+    ofstream productIntervalResultFile;
+    productIntervalResultFile.open(productIntervalResultFileName.c_str());
+    string times;
+    
+    map<int, multimap<int,string> >::iterator sourceProduct;
+    for (sourceProduct=productIntervalResult->begin(); sourceProduct!=productIntervalResult->end(); sourceProduct++) {
+        set<int> keys = getAllKeys(sourceProduct->second);
+        set<int>::iterator key;
+        for (key=keys.begin(); key!=keys.end(); key++) {
+            multimap<int, string>::size_type entries = sourceProduct->second.count(*key);
+            multimap<int, string>::iterator targetProduct = sourceProduct->second.find(*key);
+            times="";
+            for (multimap<int, string>::size_type cnt = 0; cnt != entries; ++cnt,targetProduct++) {
+                string time;
+                time = targetProduct->second;
+                times += time + ",";
+            }
+            times = times.substr(0,times.length()-1);
+            productIntervalResultFile << sourceProduct->first << " " << *key << " " << times << endl;
+        }
+    }
+    cout << "Writing the product-interval file ok!" << endl;
+}
+
 
 void PurchaseIntervalGenerator::generateProductTrans(){
     cout << "generate product-transfer..." << endl;
@@ -312,4 +377,23 @@ void PurchaseIntervalGenerator::outputProductTransFile(){
     }
     
     productTransResultFile.close();
+}
+
+
+set<int> PurchaseIntervalGenerator::getAllKeys(multimap<int, int> p){
+    multimap<int, int>::iterator tProduct;
+    set<int> keys;
+    for (tProduct = p.begin(); tProduct != p.end(); tProduct++) {
+        keys.insert(tProduct->first);
+    }
+    return keys;
+}
+
+set<int> PurchaseIntervalGenerator::getAllKeys(multimap<int, string> p){
+    multimap<int, string>::iterator tProduct;
+    set<int> keys;
+    for (tProduct = p.begin(); tProduct != p.end(); tProduct++) {
+        keys.insert(tProduct->first);
+    }
+    return keys;
 }

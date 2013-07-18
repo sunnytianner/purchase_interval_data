@@ -34,8 +34,8 @@ struct timeInfo{
 
 class PurchaseIntervalGenerator{
 private:
-    multimap<int, multimap< int, multimap<int, int> > > * productIntervalResult;//the result of product-interval in form of{user1:{item1:{item2:time}}}
-    multimap<int, multimap<int, multimap<int, int> > > * categoryIntervalResult;//the result of product-interval in form of{user1:{item1:{item2:time}}}
+    multimap<int, map< int, multimap<int, int> > > * productIntervalResult;//the result of product-interval in form of{user1:{item1:{item2:time}}}
+    multimap<int, map<int, multimap<int, int> > > * categoryIntervalResult;//the result of product-interval in form of{user1:{item1:{item2:time}}}
     map<int,map<int,int> > * productTransResult;//the result of product-transfer in form of{item1:{item2:count}}
     map<int,map<int,int> > * categoryTransResult;//the result of category-transfer in form of{item1:{item2:count}}
     string inputFileName;//the data-file name

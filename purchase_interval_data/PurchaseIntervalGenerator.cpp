@@ -18,12 +18,13 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <stdlib.h>
 
 using namespace std;
 
 PurchaseIntervalGenerator::PurchaseIntervalGenerator(string file){
-    productIntervalResult = new multimap<int, multimap<int, multimap<int, int> > >;//user{sourceproduct{targetproduct,time}}
-    categoryIntervalResult = new multimap<int, multimap<int, multimap<int, int> > >;
+    productIntervalResult = new multimap<int, map<int, multimap<int, int> > >;//user{sourceproduct{targetproduct,time}}
+    categoryIntervalResult = new multimap<int, map<int, multimap<int, int> > >;
     productTransResult = new map<int,map<int,int> >;
     categoryTransResult = new map<int,map<int,int> >;
     //definition of files
@@ -61,8 +62,9 @@ void PurchaseIntervalGenerator::generateProductInterval(){
     map<string,int> productDictMap;//productid-index dictionary in form of map
     string current_user = "";//the current user
     vector<struct productPurchaseTime> userPurchase;//a temp vetcor for containing productPurchaseTime
-    multimap<int, int> productTimeMultiMap;//a temp pair for product and time
-    multimap<int, multimap<int, int> > sourceProduct;
+    map<int, int> productTimeMap;//a temp pair for product and time
+    map<int, multimap<int, int> > sProduct;
+    multimap<int,int> temp;
     
     //open the files
     ifstream inputFile;
@@ -93,28 +95,45 @@ void PurchaseIntervalGenerator::generateProductInterval(){
             product_index++;
         }
         
-        if (current_user != userId) {
-            current_user = userId;//reset the current-userid
-            userDictMap[current_user] = user_index;
-            user_index++;
-            for (int i=0; i<userPurchase.size()-1; i++) {
-                for (int j=i+1; j<userPurchase.size(); j++) {
-                    if (userPurchase[j].time == userPurchase[i].time) {//if product i and product j are in one basket
+        if (current_user != userId || inputFile.eof()) {
+            if (inputFile.eof()) {
+                userPurchase.push_back(productTime);
+            }
+            for (vector<struct productPurchaseTime>::reverse_iterator i=userPurchase.rbegin(); i!=userPurchase.rend(); i++) {
+                struct productPurchaseTime targetProduct = *i;
+                for (vector<struct productPurchaseTime>::reverse_iterator j=i+1; j!=userPurchase.rend(); j++) {
+                    struct productPurchaseTime sourceProduct = *j;
+                    if (sourceProduct.time == targetProduct.time) {//if product i and product j are in one basket
                         continue;
                     }
-                    productTimeMultiMap.insert(make_pair(productDictMap[userPurchase[j].productid], (userPurchase[j].time - userPurchase[i].time)/(24*60*60*1000)));
+                    if (productTimeMap.find(productDictMap[sourceProduct.productid]) == productTimeMap.end()) {
+                         productTimeMap.insert(make_pair(productDictMap[sourceProduct.productid], (targetProduct.time - sourceProduct.time)/(24*60*60*1000)));
+                    }
+                }
+                for (map<int,int>::iterator it=productTimeMap.begin(); it != productTimeMap.end(); it++) {
+                    if (sProduct.find(it->first) == sProduct.end()) {
+                        temp.insert(make_pair(productDictMap[targetProduct.productid],it->second));
+                        sProduct.insert(make_pair(it->first, temp));
+                        temp.clear();
+                    }
+                    else{
+                        sProduct[it->first].insert(make_pair(productDictMap[targetProduct.productid],it->second));
+                    }
                     
                 }
-                sourceProduct.insert(make_pair(productDictMap[userPurchase[i].productid], productTimeMultiMap));
-                productTimeMultiMap.clear();
+                productTimeMap.clear();
             }
-            productIntervalResult->insert(make_pair(userDictMap[userId], sourceProduct));
-            sourceProduct.clear();
+            if (current_user != "") {
+                productIntervalResult->insert(make_pair(userDictMap[current_user], sProduct));
+            }
+            sProduct.clear();
             userPurchase.clear();
+            current_user = userId;//reset the current-userid
+            cout << current_user << endl;
+            userDictMap[current_user] = user_index;
+            user_index++;
         }
-        else{
-            userPurchase.push_back(productTime);
-        }
+        userPurchase.push_back(productTime);
     }
     
     //writing index files
@@ -148,12 +167,12 @@ void PurchaseIntervalGenerator::outputProductIntervalFile(){
     double totalDate;//the sum of date of each pair-product
     string times;//times of pair-product(t1,t2,t3...)
     
-    multimap<int, multimap<int, multimap<int, int> > >::iterator user,userEnd;
+    multimap<int, map<int, multimap<int, int> > >::iterator user,userEnd;
     userEnd = productIntervalResult->end();//calculate once
     for (user=productIntervalResult->begin(); user!=userEnd; user++) {//for each user
-        multimap<int, multimap<int, int> >::iterator sProduct, sProductEnd;
-        sProductEnd = user->second.end();
-        for (sProduct=user->second.begin(); sProduct!=sProductEnd; sProduct++) {//for each source-product
+        map<int, multimap<int,int> > sProducts = user->second;
+        map<int, multimap<int,int> >::iterator sProduct;
+        for (sProduct=sProducts.begin(); sProduct!=sProducts.end(); sProduct++) {//for each source-product
             set<int> keys = getAllKeys(sProduct->second);
             set<int>::iterator key;
             for (key=keys.begin(); key!=keys.end(); key++) {
@@ -162,24 +181,26 @@ void PurchaseIntervalGenerator::outputProductIntervalFile(){
                 coCount=0;
                 totalDate=0;
                 times="";
-                for (multimap<int, int>::size_type cnt = 0; cnt != entries; ++cnt,++coCount) {
+                for (multimap<int, int>::size_type cnt = 0; cnt != entries; ++cnt,++coCount,tProduct++) {
                     int date;
                     date = tProduct->second;
                     totalDate += date;
                     times += Util::itos(date)+",";
                 }
                 times = times.substr(0,times.length()-1);
-                productIntervalResultFile << user->first << " " << sProduct->first << " " << times << " " << coCount << " " << totalDate/coCount << endl;
+                productIntervalResultFile << user->first << " " << sProduct->first << " " << *key << " " << times << " " << coCount << " " << totalDate/coCount << endl;
             }
         }
     }
     
     productIntervalResultFile.close();
+    cout << "Writing the product-interval file ok!" <<endl;
 }
 
 void PurchaseIntervalGenerator::outputCategoryIntervalFile(){
 
 }
+
 
 set<int> PurchaseIntervalGenerator::getAllKeys(multimap<int, int> p){
     multimap<int, int>::iterator tProduct;

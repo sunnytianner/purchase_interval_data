@@ -17,8 +17,8 @@
 using namespace std;
 
 struct productPurchaseTime{
-    string productid;
-    long time;
+    long productid;
+    int time;
 };
 
 struct categoryPurchaseTime{
@@ -26,21 +26,15 @@ struct categoryPurchaseTime{
     long time;
 };
 
-struct timeInfo{
-    string times;
-    int count;
-    double avg;
-};
-
 class PurchaseIntervalGenerator{
 private:
-    multimap<int, map< int, multimap<int, int> > > * productPersonalIntervalResult;//the result of personal-product-interval in form of{user1:{item1:{item2:time}}}
-    multimap<int, map<int, multimap<int, int> > > * categoryPersonalIntervalResult;//the result of personal-category-interval in form of{user1:{item1:{item2:time}}}
+    multimap<long, map< long, multimap<long, int> > > * productPersonalIntervalResult;//the result of personal-product-interval in form of{user1:{item1:{item2:time}}}
+    multimap<long, map<long, multimap<long, int> > > * categoryPersonalIntervalResult;//the result of personal-category-interval in form of{user1:{item1:{item2:time}}}
     
-    map<int, multimap<int,string> > * productIntervalResult;//the result of product-interval in form of{item1:{item2:time}}
+    map<long, multimap<long,string> > * productIntervalResult;//the result of product-interval in form of{item1:{item2:time}}
     
-    map<int,map<int,int> > * productTransResult;//the result of product-transfer in form of{item1:{item2:count}}
-    map<int,map<int,int> > * categoryTransResult;//the result of category-transfer in form of{item1:{item2:count}}
+    map<long,map<long,int> > * productTransResult;//the result of product-transfer in form of{item1:{item2:count}}
+    map<long,map<long,int> > * categoryTransResult;//the result of category-transfer in form of{item1:{item2:count}}
     
     string inputFileName;//the data-file name
     string productPersonalIntervalResultFileName;//the file contains the results of personal-product-interval reperesented by index(user-index and product-index),the file is in the form of [user source-product target-product {time1,time2,...} total-number average-interval]
@@ -48,9 +42,6 @@ private:
     string productIntervalResultFileName;////the file contains the results of product-interval reperesented by index(user-index and product-index),the file is in the form of [source-product target-product {time1,time2,...}]
     string productTransResultFileName;//the file contains the results of product-transfer reperesented by index(user-index and product-index),the file is in the form of [source-product target-product count]
     string categoryTransResultFileName;//the file contains the results of category-transfer reperesented by index(user-index and category-index),the file is in the form of [source-category target-category count]
-    string userDictFileName;//the dictionary of user-id to user-name,the file is in the form of [id userid]
-    string productDictFileName;//the dictionary of product-id to product-name,the file is in the form of [id productid]
-    string categoryDictFileName;//the dictionary of category-id to category-name,the file is in the form of [id categoryid]
     
     
 public:
@@ -71,8 +62,8 @@ public:
     void generateCategorTrans();//generate the transaction file of category
     void outputCategorTransFile();//output categoryTransResult in form of file
     
-    set<int> getAllKeys(multimap<int, int> p);//get all unique keys of multimap
-    set<int> getAllKeys(multimap<int, string> p);//get all unique keys of multimap
+    set<long> getAllKeys(multimap<long, int> p);//get all unique keys of multimap
+    set<long> getAllKeys(multimap<long, string> p);//get all unique keys of multimap
 };
 
 #endif

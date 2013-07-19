@@ -13,12 +13,12 @@ using namespace std;
 
 int main(int argc, const char * argv[])
 {
-    PurchaseIntervalGenerator purchaseInterval("/Users/tian19880220/workspace/data/purchase_interval_data/purchase-40-55-1year-uniq-top7.5w-sort");
+    PurchaseIntervalGenerator purchaseInterval("/Users/tian19880220/workspace/data/purchase_interval_data/purchase-40-55-1year-top7.5w-id-uniq-sort");
     //purchaseInterval.generatePersonalProductInterval();
     //purchaseInterval.outputPersonalProductIntervalFile();
-    //purchaseInterval.generateProductTrans();
-    //purchaseInterval.outputProductTransFile();
-    purchaseInterval.generateProductInterval();
-    purchaseInterval.outputProductIntervalFile();
+    purchaseInterval.generateProductTrans();
+    purchaseInterval.outputProductTransFile();
+    //purchaseInterval.generateProductInterval();
+    //purchaseInterval.outputProductIntervalFile();
 }
 

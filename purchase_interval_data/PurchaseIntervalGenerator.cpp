@@ -32,6 +32,8 @@ PurchaseIntervalGenerator::PurchaseIntervalGenerator(string file){
     productTransResult = new map<long,map<long,int> >;
     categoryTransResult = new map<long,map<long,int> >;
     
+    productCoocResult = new map<long,map<long,int> >;
+    
     //definition of files
     inputFileName = file;
     //cout << inputFileName << endl;
@@ -40,6 +42,7 @@ PurchaseIntervalGenerator::PurchaseIntervalGenerator(string file){
     productIntervalResultFileName = inputFileName + "-interval-product";
     productTransResultFileName = inputFileName + "-trans-product";
     categoryTransResultFileName = inputFileName + "-trans-category";
+    productCoocResultFileName = inputFileName + "-cooc-product";
 }
 
 PurchaseIntervalGenerator::~PurchaseIntervalGenerator(){
@@ -57,6 +60,9 @@ PurchaseIntervalGenerator::~PurchaseIntervalGenerator(){
     }
     if (categoryTransResult) {
         delete categoryTransResult;
+    }
+    if (productCoocResult) {
+        delete productCoocResult;
     }
 }
 
@@ -353,6 +359,92 @@ void PurchaseIntervalGenerator::outputProductTransFile(){
     
     productTransResultFile.close();
     cout << "Writing the product-transfer file ok!" << endl;
+}
+
+void PurchaseIntervalGenerator::generateProductCooccurrence(){
+    cout << "generate product-coocurrence..." << endl;
+    long current_user = 0;//the current user
+    vector<struct productPurchaseTime> userPurchase;//a temp vetcor for containing productPurchaseTime of each user
+    map<long, int> productTimeMap;//a temp pair for product and time,it helps the product find the nearest influenceing product
+    
+    //open the input-files
+    ifstream inputFile;
+    inputFile.open(inputFileName.c_str());
+    
+    while (!inputFile.eof()) {
+        string line;
+        getline(inputFile,line);//read a line
+        if(line.size() == 0)
+            continue;
+        
+        vector<string> items = Util::split(line, SPACE);
+        int time = atoi(items[0].c_str());
+        long userId = atol(items[1].c_str());
+        long productId = atol(items[2].c_str());
+        
+        struct productPurchaseTime productTime;
+        productTime.productid = productId;
+        productTime.time = time;
+        
+        if (current_user != userId || inputFile.eof()) {
+            if (inputFile.eof()) {
+                userPurchase.push_back(productTime);
+            }
+            for (vector<struct productPurchaseTime>::reverse_iterator i=userPurchase.rbegin(); i!=userPurchase.rend(); i++) {
+                struct productPurchaseTime targetProduct = *i;
+                for (vector<struct productPurchaseTime>::reverse_iterator j=i+1; j!=userPurchase.rend(); j++) {
+                    struct productPurchaseTime sourceProduct = *j;
+                    /*if (sourceProduct.time == targetProduct.time) {//if product i and product j are in one basket
+                        continue;
+                    }*/
+                    if (productTimeMap.find(sourceProduct.productid) == productTimeMap.end()) {
+                        productTimeMap.insert(make_pair(sourceProduct.productid, (targetProduct.time - sourceProduct.time)));
+                    }
+                }
+                for (map<long,int>::iterator it=productTimeMap.begin(); it != productTimeMap.end(); it++) {
+                    if (productCoocResult->find(it->first) == productCoocResult->end()) {
+                        (*productCoocResult)[it->first][targetProduct.productid] = 0;
+                    }
+                    (*productCoocResult)[it->first][targetProduct.productid] += 1;
+                    if (productCoocResult->find(targetProduct.productid) == productCoocResult->end()) {
+                        (*productCoocResult)[targetProduct.productid][it->first] = 0;
+                    }
+                    (*productCoocResult)[targetProduct.productid][it->first] += 1;
+                }
+                productTimeMap.clear();
+            }
+            userPurchase.clear();
+            current_user = userId;//reset the current-userid
+            cout << current_user << endl;
+        }
+        userPurchase.push_back(productTime);
+    }
+    inputFile.close();
+    
+}
+
+void PurchaseIntervalGenerator::outputProductCooccurrenceFile(){
+    cout << "Wtriting the product-coocurrence file..." << endl;
+    ofstream productCoocResultFile;
+    productCoocResultFile.open(productCoocResultFileName.c_str());
+    
+    map<long, map<long, int> >::iterator source,sourceEnd;
+    sourceEnd = productCoocResult->end();//calculate once
+    for (source=productCoocResult->begin(); source!=sourceEnd; source++) {
+        map<long,int> target = source->second;
+        map<long,int>::iterator it,itEnd;
+        itEnd = target.end();
+        double sum = 0;
+        for (it=target.begin(); it!=itEnd; it++) {
+            sum += it->second;
+        }
+        for (it=target.begin(); it!=itEnd; it++) {
+            productCoocResultFile << source->first << " " << it->first << " " << (it->second) / sum << endl;
+        }
+    }
+    
+    productCoocResultFile.close();
+    cout << "Writing the product-coocurrence file ok!" << endl;
 }
 
 

@@ -36,12 +36,16 @@ private:
     map<long,map<long,int> > * productTransResult;//the result of product-transfer in form of{item1:{item2:count}}
     map<long,map<long,int> > * categoryTransResult;//the result of category-transfer in form of{item1:{item2:count}}
     
+    map<long,map<long,int> > * productCoocResult;//the result of product-cooccurrence in form of{item1:{item2:count}}
+    //map<long,map<long,int> > * categoryCoocResult;//the result of category-cooccurrence in form of{item1:{item2:count}}
+    
     string inputFileName;//the data-file name
     string productPersonalIntervalResultFileName;//the file contains the results of personal-product-interval reperesented by index(user-index and product-index),the file is in the form of [user source-product target-product {time1,time2,...} total-number average-interval]
     string categoryPersonalIntervalResultFileName;//the file contains the results of personal-category-interval reperesented by index(user-index and category-index),the file is in the form of [user source-category target-category {time1,time2,...} total-number average-interval]
     string productIntervalResultFileName;////the file contains the results of product-interval reperesented by index(user-index and product-index),the file is in the form of [source-product target-product {time1,time2,...}]
     string productTransResultFileName;//the file contains the results of product-transfer reperesented by index(user-index and product-index),the file is in the form of [source-product target-product count]
     string categoryTransResultFileName;//the file contains the results of category-transfer reperesented by index(user-index and category-index),the file is in the form of [source-category target-category count]
+    string productCoocResultFileName;
     
     
 public:
@@ -61,6 +65,9 @@ public:
     void outputProductTransFile();//output productTransResult in form of file
     void generateCategorTrans();//generate the transaction file of category
     void outputCategorTransFile();//output categoryTransResult in form of file
+    
+    void generateProductCooccurrence();
+    void outputProductCooccurrenceFile();
     
     set<long> getAllKeys(multimap<long, int> p);//get all unique keys of multimap
     set<long> getAllKeys(multimap<long, string> p);//get all unique keys of multimap
